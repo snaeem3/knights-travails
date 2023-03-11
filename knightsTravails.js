@@ -19,7 +19,56 @@ class Graph {
         if (!this.AdjList.get(w).includes(v)) {
             this.AdjList.get(w).push(v);
         }
-    }  
+    }
+
+    dijkstra(source, target) {
+        const MAX_VALUE = 9007199254740991;
+        let dist = {};
+        let prev = {};
+        let q = [];
+        let finalSequence = [];
+        // console.log(this.AdjList);
+        for (const [vertex, neighbors] of this.AdjList.entries()) {
+            neighbors.forEach((neighbor) => {
+                // console.log(vertex, neighbor);
+            });
+            dist[vertex] = MAX_VALUE;
+            prev[vertex] = null;
+            q.push(vertex);
+        }
+
+        dist[source] = 0;
+        // console.log(dist);
+
+        while (q.length > 0) {
+            // Get vertex from q that has the minimum dist
+            // let currentVertex = Object.keys(dist).reduce((key, v) => dist[v] < dist[key] ? v : key);
+            let currentVertex = q.reduce((key, v) => dist[v] < dist[key] ? v : key);
+
+            if (prev[target] !== null || currentVertex === target) {
+                while (currentVertex !== null) {
+                    finalSequence.push(currentVertex);
+                    currentVertex = prev[currentVertex];
+                }
+                break;
+            }
+
+            // console.log(currentVertex);
+            q.splice(q.indexOf(currentVertex),1);
+
+            for (const neighbor of this.AdjList.get(currentVertex)) {
+                if (q.includes(neighbor)) {
+                    const distToNeighbor = dist[currentVertex] + 1;
+                    if (distToNeighbor < dist[neighbor]) {
+                        dist[neighbor] = distToNeighbor;
+                        prev[neighbor] = currentVertex;
+                    }
+                }
+            }
+        }
+
+        return {dist, prev, finalSequence};
+    }
 
 
     printGraph() {
@@ -38,39 +87,7 @@ class Graph {
             console.log(i + " -> " + conc);
         }
     }
- 
-    bfs(startingNode, endingNode) {
-        // create a visited object
-        var visited = {};
-    
-        // Create an object for queue
-        var q = new Queue();
-    
-        // add the starting node to the queue
-        visited[startingNode] = true;
-        q.enqueue(startingNode);
-    
-        // loop until queue is empty
-        while (!q.isEmpty()) {
-            // get the element from the queue
-            var getQueueElement = q.dequeue();
-    
-            // passing the current vertex to callback function
-            console.log(getQueueElement);
-    
-            // get the adjacent list for current vertex
-            var get_List = this.AdjList.get(getQueueElement);
-    
-            for (var i in get_List) {
-                var neigh = get_List[i];
-    
-                if (!visited[neigh]) {
-                    visited[neigh] = true;
-                    q.enqueue(neigh);
-                }
-            }
-        }
-    }
+
 }
 
 function createBoard(size) {
@@ -121,7 +138,8 @@ function knightMoves(startCoord, endCoord) {
 
 }
 
-const board = createBoard(5);
+const board = createBoard(8);
 board.printGraph();
-
-board.bfs([0,1]);
+console.log(board.dijkstra('0,0','4,4').dist);
+console.log(board.dijkstra('0,0','4,4').prev);
+console.log(board.dijkstra('0,0','4,4').finalSequence);
