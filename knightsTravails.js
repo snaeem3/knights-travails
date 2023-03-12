@@ -1,6 +1,5 @@
 class Graph {
-    // defining vertex array and
-    // adjacent list
+    // defining vertex array and adjacent list
     constructor(noOfVertices)
     {
         this.noOfVertices = noOfVertices;
@@ -29,9 +28,9 @@ class Graph {
         let finalSequence = [];
         // console.log(this.AdjList);
         for (const [vertex, neighbors] of this.AdjList.entries()) {
-            neighbors.forEach((neighbor) => {
-                // console.log(vertex, neighbor);
-            });
+            // neighbors.forEach((neighbor) => {
+            //     // console.log(vertex, neighbor);
+            // });
             dist[vertex] = MAX_VALUE;
             prev[vertex] = null;
             q.push(vertex);
@@ -42,18 +41,17 @@ class Graph {
 
         while (q.length > 0) {
             // Get vertex from q that has the minimum dist
-            // let currentVertex = Object.keys(dist).reduce((key, v) => dist[v] < dist[key] ? v : key);
             let currentVertex = q.reduce((key, v) => dist[v] < dist[key] ? v : key);
 
-            if (prev[target] !== null || currentVertex === target) {
-                while (currentVertex !== null) {
-                    finalSequence.push(currentVertex);
-                    currentVertex = prev[currentVertex];
-                }
-                break;
-            }
+            // if (prev[target] !== null || currentVertex === target) {
+            //     while (currentVertex !== null) {
+            //         finalSequence.push(currentVertex);
+            //         currentVertex = prev[currentVertex];
+            //     }
+            //     finalSequence.unshift(target);
+            //     break;
+            // }
 
-            // console.log(currentVertex);
             q.splice(q.indexOf(currentVertex),1);
 
             for (const neighbor of this.AdjList.get(currentVertex)) {
@@ -67,7 +65,16 @@ class Graph {
             }
         }
 
-        return {dist, prev, finalSequence};
+        let node = target;
+        while (node !== source) {
+            finalSequence.push(node);
+            node = prev[node];
+        }
+        finalSequence.push(source);
+
+        const numMoves = finalSequence.length - 1; // subtract 1 for adding target to sequence
+
+        return {dist, prev, finalSequence, numMoves};
     }
 
 
@@ -127,19 +134,63 @@ function createBoard(size) {
             });
         }
     }
-
-
+    
+    
+    // console.log(board.AdjList);
     return board;
 }
 
-
-
-function knightMoves(startCoord, endCoord) {
-
+function sequenceStringToMatrix (sequenceArray) {
+    // Convert a sequence of strings to a numerical 2D array
+    let result = [];
+    sequenceArray.forEach(coordinate => {
+        result.push([parseInt(coordinate[0]), parseInt(coordinate[2])]);
+    });
+    return result;
 }
 
-const board = createBoard(8);
-board.printGraph();
-console.log(board.dijkstra('0,0','4,4').dist);
-console.log(board.dijkstra('0,0','4,4').prev);
-console.log(board.dijkstra('0,0','4,4').finalSequence);
+function createBoardTable(boardSize, sequenceArray) {
+    // Create a table of the board
+    const boardArray = [...Array(boardSize)].map(e => Array(boardSize).fill(`-`)); //⬜ ⬛
+    let moveNum = 0;
+    sequenceArray.forEach(coordinate => {
+        boardArray[coordinate[0]][coordinate[1]] = moveNum;
+        moveNum += 1;
+    });
+    return boardArray;
+}
+
+
+
+function knightMoves(startCoord, endCoord, gridSize = 8) {
+    const board = createBoard(gridSize);
+    const dijkstraResult = board.dijkstra(
+        `${startCoord[0]},${startCoord[1]}`,
+        `${endCoord[0]},${endCoord[1]}`);
+
+    const boardSequence = sequenceStringToMatrix(dijkstraResult.finalSequence.reverse());
+
+    console.log(`You made it in ${dijkstraResult.numMoves} moves!  Here's your path:`);
+    console.log(boardSequence);
+    console.table(createBoardTable(gridSize, boardSequence));
+}
+
+
+// Examples:
+console.log('-------------------------------------------------------')
+console.log('--------------------- Example 1: ----------------------')
+console.log('-------------------------------------------------------')
+console.log(`Starting from (0,0) and ending at (7,4): `);
+knightMoves([0,0],[7,4])
+
+console.log('-------------------------------------------------------')
+console.log('--------------------- Example 2: ----------------------')
+console.log('-------------------------------------------------------')
+console.log(`Starting from (5,3) and ending at (0,0): `);
+knightMoves([5,3],[0,0]);
+
+console.log('-------------------------------------------------------')
+console.log('--------------------- Example 3: ----------------------')
+console.log('-------------------------------------------------------')
+console.log(`Starting from (1,3) and ending at (8,7) on a 10 x 10 grid: `);
+knightMoves([1,3],[8,7], 10);
