@@ -26,7 +26,6 @@ class Graph {
         let prev = {};
         let q = [];
         let finalSequence = [];
-        // console.log(this.AdjList);
         for (const [vertex, neighbors] of this.AdjList.entries()) {
             // neighbors.forEach((neighbor) => {
             //     // console.log(vertex, neighbor);
@@ -37,21 +36,12 @@ class Graph {
         }
 
         dist[source] = 0;
-        // console.log(dist);
 
         while (q.length > 0) {
             // Get vertex from q that has the minimum dist
             let currentVertex = q.reduce((key, v) => dist[v] < dist[key] ? v : key);
 
-            // if (prev[target] !== null || currentVertex === target) {
-            //     while (currentVertex !== null) {
-            //         finalSequence.push(currentVertex);
-            //         currentVertex = prev[currentVertex];
-            //     }
-            //     finalSequence.unshift(target);
-            //     break;
-            // }
-
+            // Remove current vertex from q
             q.splice(q.indexOf(currentVertex),1);
 
             for (const neighbor of this.AdjList.get(currentVertex)) {
@@ -65,6 +55,7 @@ class Graph {
             }
         }
 
+        // Construct final sequence
         let node = target;
         while (node !== source) {
             finalSequence.push(node);
@@ -135,8 +126,6 @@ function createBoard(size) {
         }
     }
     
-    
-    // console.log(board.AdjList);
     return board;
 }
 
